@@ -14,6 +14,11 @@
 #   # ...do things to stuf...
 #   rtyaml.dump(stuff, open("myfile.yaml", "w"))
 #
+# Like the underlying pyyaml library, load accepts a byte string,
+# a Unicode string, an open binary file object, or an open text file
+# object, and the second argument to dump is optional and if omitted
+# the result is returned as a string.
+#
 # Dependencies:
 #
 # * pyyaml (in Ubuntu, the python-yaml package)
@@ -149,14 +154,14 @@ def load(stream):
 
     return obj
 
-def dump(data, stream):
+def dump(data, stream=None):
     # If we pulled in an initial comment block when reading the stream, write
     # it back out at the start of the stream.
     if hasattr(data, '__initial_comment_block'):
         stream.write(data.__initial_comment_block)
 
     # Write the object to the stream.
-    yaml.dump(data, stream, default_flow_style=False, allow_unicode=True, Dumper=Dumper)
+    return yaml.dump(data, stream, default_flow_style=False, allow_unicode=True, Dumper=Dumper)
 
 def pprint(data):
     yaml.dump(data, sys.stdout, default_flow_style=False, allow_unicode=True)
