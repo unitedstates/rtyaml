@@ -19,6 +19,8 @@
 # * pyyaml (in Ubuntu, the python-yaml package)
 # * libyaml (in Ubuntu, the libyaml-0-2 package)
 #
+# This script works in both Python 2 and 3.
+#
 # This library does the following:
 #
 # * Uses the native libyaml CSafeLoader and CDumper for both speed
@@ -97,8 +99,14 @@ def our_string_representer(dumper, value):
 	style = None # let PyYAML choose?
 	if re.match(r"^0\d*$", value): style = "'"
 	return dumper.represent_scalar(u'tag:yaml.org,2002:str', value, style=style)
-Dumper.add_representer(str, our_string_representer)
-Dumper.add_representer(unicode, our_string_representer)
+if sys.version < '3':
+    # python 2 'str' and 'unicode'
+    Dumper.add_representer(str, our_string_representer)
+    Dumper.add_representer(unicode, our_string_representer)
+else:
+    # python 3 'str' only -- bytes should only hold binary data
+    # and be serialized as such.
+    Dumper.add_representer(str, our_string_representer)
 
 # Add a representer for nulls too. YAML accepts "~" for None, but the
 # default output converts that to "null". Override to always use "~".
@@ -117,10 +125,11 @@ Dumper.add_representer(RtYamlList, RtYamlList_serializer)
 
 def load(stream):
     # Read any comment block at the start. We can only do this if we can
-    # peek the stream. Convert a file to an io.BufferedReader for convenience.
+    # peek the stream. Convert a file to an io.BufferedReader for convenience
+    # (Python 2 only, since in Python 3 files are normally opened buffered).
     # Attempt to read for a comment block if the stream has a peek method.
     initial_comment_block = ""
-    if isinstance(stream, file):
+    if sys.version < '3' and isinstance(stream, file):
         stream = io.open(stream.fileno(), mode="rb", closefd=False)
     if hasattr(stream, "peek") and hasattr(stream, "readline"):
         while stream.peek(1)[0] == "#":
