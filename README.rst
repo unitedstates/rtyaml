@@ -39,7 +39,7 @@ This library does the following:
 * Writes mappings and lists in the expanded (one per line) format, which is nice when the output is going in version control.
 * Modifies the string quote rules so that any string made up of digits is serialized with quotes. (The defaults will omit quotes for octal-ish strings like "09" that are invalid octal notation.)
 * Serializes null values as the tilde, since "null" might be confused for a string-typed value.
-* If a block comment appears at the start of the file (i.e. one or more lines starting with a '#', write back out the commend if the same object is written with rtyaml.dump().)
+* If a block comment appears at the start of the file (i.e. one or more lines starting with a '#'), write back out the comment if the same object is written with rtyaml.dump().
 
 Public domain dedication
 ------------------------
