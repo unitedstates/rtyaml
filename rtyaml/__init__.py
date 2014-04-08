@@ -82,15 +82,19 @@ Dumper.add_representer(RtYamlList, RtYamlList_serializer)
 
 def load(stream):
     # Read any comment block at the start. We can only do this if we can
-    # peek the stream. Convert a file to an io.BufferedReader for convenience
-    # (Python 2 only, since in Python 3 files are normally opened buffered).
-    # Attempt to read for a comment block if the stream has a peek method.
+    # seek the stream so we can simulate a peek(). Peek isn't provided
+    # on the io.TextIOWrapper so we can't use it on text streams.
     initial_comment_block = ""
     if sys.version < '3' and isinstance(stream, file):
         stream = io.open(stream.fileno(), mode="rb", closefd=False)
-    if hasattr(stream, "peek") and hasattr(stream, "readline"):
-        while stream.peek(1)[0] == "#":
-            initial_comment_block += stream.readline()
+    if hasattr(stream, "seek") and hasattr(stream, "tell") and hasattr(stream, "readline"):
+        while True:
+            p = stream.tell()
+            line = stream.readline()
+            if line[0] != "#":
+                stream.seek(p)
+                break
+            initial_comment_block += line
 
     # Read the object from the stream.
     obj = yaml.load(stream, Loader=Loader)
