@@ -1,0 +1,2 @@
+include rtyaml/__init__.py
+include LICENSE README.rst

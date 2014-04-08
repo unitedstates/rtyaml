@@ -1,7 +1,7 @@
 rtyaml: Round-trippable YAML
 ============================
 
-Primary author: Joshua Tauberer
+Primary author: Joshua Tauberer <http://razor.occams.info>
 
 https://github.com/unitedstates/rtyaml
 
@@ -23,8 +23,8 @@ As in the underlying pyyaml library, ``load`` accepts a byte string containing Y
 Dependencies
 -------------
 
-* pyyaml (in Ubuntu, the python-yaml package)
-* libyaml (in Ubuntu, the libyaml-0-2 package)
+* pyyaml (in Ubuntu, the ``python-yaml`` or ``python3-yaml`` package)
+* libyaml (in Ubuntu, the ``libyaml-0-2`` package plus, at install time only, ``libyaml-dev``)
 
 This package works in both Python 2 and 3.
 
