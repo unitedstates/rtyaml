@@ -3,8 +3,8 @@ rtyaml: Round-trippable YAML
 
 Primary author: Joshua Tauberer <http://razor.occams.info>
 
-GitHub: https://github.com/unitedstates/rtyaml
-PyPi: https://pypi.python.org/pypi/rtyaml
+* GitHub: https://github.com/unitedstates/rtyaml
+* PyPi: https://pypi.python.org/pypi/rtyaml
 
 This module provides wrappers around ``pyyaml`` to set sane defaults:
 
