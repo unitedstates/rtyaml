@@ -3,13 +3,18 @@ rtyaml: Round-trippable YAML
 
 Primary author: Joshua Tauberer <http://razor.occams.info>
 
-https://github.com/unitedstates/rtyaml
+GitHub: https://github.com/unitedstates/rtyaml
+PyPi: https://pypi.python.org/pypi/rtyaml
 
 This module provides wrappers around ``pyyaml`` to set sane defaults:
 
 * field order in dicts is preserved when writing out objects that were read in by this library
 * saner output defaults are set
 * any comment block found at the very beginning of the file when loading YAML is preserved when writing it back out
+
+Install::
+
+   pip install rtyaml
 
 Usage::
 
