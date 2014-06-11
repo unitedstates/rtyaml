@@ -15,6 +15,7 @@ This module provides wrappers around ``pyyaml`` to set sane defaults:
 Install::
 
    pip install rtyaml
+   (or pip3 --- this module works in both Python 2 and Python 3)
 
 Usage::
 
@@ -30,8 +31,6 @@ Dependencies
 
 * pyyaml (in Ubuntu, the ``python-yaml`` or ``python3-yaml`` package)
 * libyaml (in Ubuntu, the ``libyaml-0-2`` package plus, at install time only, ``libyaml-dev``)
-
-This package works in both Python 2 and 3.
 
 Details
 -------

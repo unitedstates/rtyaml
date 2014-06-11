@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
     name='rtyaml',
-    version='0.0.1',
+    version='0.0.2',
     author=u'Joshua Tauberer',
     author_email=u'jt@occams.info',
     packages=['rtyaml'],
