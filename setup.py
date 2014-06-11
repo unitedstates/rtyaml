@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+
+# Note to self: To upload a new version to PyPI, run:
+# python setup.py sdist upload
+
 from distutils.core import setup
 
 setup(
