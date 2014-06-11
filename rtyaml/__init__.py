@@ -34,7 +34,7 @@ Dumper.add_representer(OrderedDict, ordered_dict_serializer)
 # Likewise, when we store unicode objects make sure we don't write
 # them with weird YAML tags indicating the Python data type. str-typed
 # strings come out fine, but unicode strings come out with unnecessary
-# type tags. The easy solution is this:
+# type tags in Python 2. The easy solution is this:
 #
 #   Dumper.add_representer(unicode, lambda dumper, value:
 #        dumper.represent_scalar(u'tag:yaml.org,2002:str', value))
@@ -50,12 +50,29 @@ Dumper.add_representer(OrderedDict, ordered_dict_serializer)
 # We will override str and unicode output to choose the quotation
 # style with our own logic. (According to PyYAML, style can be one of
 # the empty string, ', ", |, or >, or None to, presumably, choose
-# automatically.
+# automatically and use no quoting where possible.
 def our_string_representer(dumper, value):
+	# let PyYAML choose by default, using no quoting where possible
+	style = None
+
 	# If it looks like an octal number, force '-quote style.
-	style = None # let PyYAML choose?
 	if re.match(r"^0\d*$", value): style = "'"
+
+	# If it has newlines, request a block style.
+	if "\n" in value:
+		# If the average length of a line is very long, then use the folded
+		# style so that in our output the lines get folded. The drawback when
+		# this is used on shortlines is that newlines get doubled. So when
+		# the lines are short, use the literal block style.
+		lines = value.split("\n")
+		avg_line_length = sum(len(line) for line in lines) / float(len(lines))
+		if avg_line_length > 70:
+			style = ">" # folded
+		else:
+			style = "|"
+
 	return dumper.represent_scalar(u'tag:yaml.org,2002:str', value, style=style)
+
 if sys.version < '3':
     # python 2 'str' and 'unicode'
     Dumper.add_representer(str, our_string_representer)

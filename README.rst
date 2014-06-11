@@ -8,9 +8,9 @@ Primary author: Joshua Tauberer <http://razor.occams.info>
 
 This module provides wrappers around ``pyyaml`` to set sane defaults:
 
-* field order in dicts is preserved when writing out objects that were read in by this library
-* saner output defaults are set
-* any comment block found at the very beginning of the file when loading YAML is preserved when writing it back out
+* round-tripping YAML files is possible by preserving field order
+* saner output defaults are set for strings
+* a comment block found at the very beginning of a stream when loading YAML is preserved when writing it back out
 
 Install::
 
@@ -41,10 +41,11 @@ This library does the following:
 * Uses the native libyaml CSafeLoader and CDumper for both speed and trustable operations.
 * Parses mappings as OrderedDicts so that the field order remains the same when dumping the file later.
 * Writes unicode strings without any weird YAML tag. They just appear as strings. Output is UTF-8 encoded, and non-ASCII characters appear as Unicode without escaping.
+* Writes multi-line strings in block mode rather than quoted with embedded "\n"'s, choosing between the literal or folded mode depending on what looks better for the length of the lines in the string.
 * Writes mappings and lists in the expanded (one per line) format, which is nice when the output is going in version control.
-* Modifies the string quote rules so that any string made up of digits is serialized with quotes. (The defaults will omit quotes for octal-ish strings like "09" that are invalid octal notation.)
-* Serializes null values as the tilde, since "null" might be confused for a string-typed value.
-* If a block comment appears at the start of the file (i.e. one or more lines starting with a '#'), write back out the comment if the same object is written with rtyaml.dump().
+* Modifies the string quote rules so that any string made up of digits is serialized with quotes. (The default settings serialize the string "01" with quotes but the string "09" without quotes! (Can you figure out why?))
+* Serializes null values as the tilde rather than as "null" (without quotes), which I think is less confusing.
+* If a block comment appears at the start of the file (i.e. one or more lines starting with a '#'), write it back out if the same object is written with rtyaml.dump().
 
 Public domain dedication
 ------------------------
