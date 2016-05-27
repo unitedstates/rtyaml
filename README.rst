@@ -26,6 +26,8 @@ Usage::
 
 As in the underlying pyyaml library, ``load`` accepts a byte string containing YAML, a Unicode string containing YAML, an open binary file object, or an open text file object. Also, the second argument to ``dump`` is optional and if omitted the function returns the YAML in a string.
 
+``load_all`` and ``dump_all`` are also supported, which load and save lists of documents using YAML's ``---`` document separator.
+
 Dependencies
 -------------
 

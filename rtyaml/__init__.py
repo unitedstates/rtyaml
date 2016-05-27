@@ -98,6 +98,12 @@ Dumper.add_representer(RtYamlList, RtYamlList_serializer)
 # Provide some wrapper methods that apply typical settings.
 
 def load(stream):
+    return do_load(stream, yaml.load)
+
+def load_all(stream):
+    return do_load(stream, yaml.load_all)
+
+def do_load(stream, load_func):
     # Read any comment block at the start. We can only do this if we can
     # seek the stream so we can simulate a peek(). Peek isn't provided
     # on the io.TextIOWrapper so we can't use it on text streams.
@@ -114,7 +120,7 @@ def load(stream):
             initial_comment_block += line
 
     # Read the object from the stream.
-    obj = yaml.load(stream, Loader=Loader)
+    obj = load_func(stream, Loader=Loader)
 
     # Attach our initial comment to the object so we can save it later (assuming
     # this object is written back out).
@@ -128,13 +134,19 @@ def load(stream):
     return obj
 
 def dump(data, stream=None):
+    return do_dump(data, stream, yaml.dump)
+
+def dump_all(data, stream=None):
+    return do_dump(data, stream, yaml.dump_all)
+
+def do_dump(data, stream, dump_func):
     # If we pulled in an initial comment block when reading the stream, write
     # it back out at the start of the stream.
     if hasattr(data, '__initial_comment_block'):
         stream.write(data.__initial_comment_block)
 
     # Write the object to the stream.
-    return yaml.dump(data, stream, default_flow_style=False, allow_unicode=True, Dumper=Dumper)
+    return dump_func(data, stream, default_flow_style=False, allow_unicode=True, Dumper=Dumper)
 
 def pprint(data):
     yaml.dump(data, sys.stdout, default_flow_style=False, allow_unicode=True)
