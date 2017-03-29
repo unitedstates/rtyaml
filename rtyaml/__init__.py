@@ -5,8 +5,9 @@ import yaml
 try:
     # Use the native code backends, if available.	
     from yaml import CSafeLoader as Loader, CDumper as Dumper
+    from _yaml import Mark
 except ImportError:
-    from yaml import SafeLoader as Loader, Dumper
+    from yaml import SafeLoader as Loader, Dumper, Mark
 
 # In order to preserve the order of attributes, YAML must be
 # hooked to load mappings as OrderedDicts. Adapted from:
