@@ -104,13 +104,18 @@ def load_all(stream):
     return do_load(stream, yaml.load_all)
 
 def do_load(stream, load_func):
-    # Read any comment block at the start. We can only do this if we can
-    # seek the stream so we can simulate a peek(). Peek isn't provided
-    # on the io.TextIOWrapper so we can't use it on text streams.
+    # Read any comment block at the start.
     initial_comment_block = ""
+
+    # We can only read a comment block if we can seek the stream so we can simulate
+    # a peek() so we can test for a comment block without consuming the data. Seek
+    # isn't provided on the Python 2 io.TextIOWrapper so we can't use it on text streams.
     if sys.version < '3' and isinstance(stream, file):
         stream = io.open(stream.fileno(), mode="rb", closefd=False)
-    if hasattr(stream, "seek") and hasattr(stream, "tell") and hasattr(stream, "readline"):
+
+    # Try reading the stream until the first non-comment line, then seek back to the
+    # start of that line.
+    try:
         while True:
             p = stream.tell()
             line = stream.readline()
@@ -118,6 +123,10 @@ def do_load(stream, load_func):
                 stream.seek(p)
                 break
             initial_comment_block += line
+    except (AttributeError, io.UnsupportedOperation) as e:
+        # seek, tell, and readline may not be present and will raise an AttributeError
+        # or seek/tell may raise io.UnsupportedOperation.
+        pass
 
     # Read the object from the stream.
     obj = load_func(stream, Loader=Loader)
