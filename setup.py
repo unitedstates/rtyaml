@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# Note to self: To upload a new version to PyPI, run:
-# python setup.py sdist upload
+# pip3 install twine
+# rm -rf dist && python3 setup.py bdist_wheel --universal
+# twine upload dist/*
+# git tag v1.0.XXX
+# git push --tags
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='rtyaml',
-    version='0.0.3',
+    version='0.0.4',
     author=u'Joshua Tauberer',
     author_email=u'jt@occams.info',
     packages=['rtyaml'],
