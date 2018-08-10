@@ -160,3 +160,68 @@ def do_dump(data, stream, dump_func):
 def pprint(data):
     yaml.dump(data, sys.stdout, default_flow_style=False, allow_unicode=True)
 
+# This class is a helper that facilitates editing YAML files
+# in place. Use as:
+#
+# with rtyaml.edit("path/to/data.yaml", default={}) as data:
+#   data["hello"] = "world"
+#
+# The file is opened for editing ("r+ mode"), read, and its
+# parsed YAML data returned as the with-block variable (`data`
+# in this case). The file is kept open while the with-block
+# is executing. When the with-block exits the stream is overwritten
+# with the new YAML data, and the file is closed.
+#
+# This will of course only work if the file contains an array
+# or object (dict), and you cannot assign a new value to the
+# with-block variable --- you can only call its methods, e.g.
+# you can edit the list and dict, but you can't replace the
+# value with an entirely new list or dict.
+#
+# If the default parameter is not given, or is None, the file
+# must exist. Otherwise, if the file doesn't exist, it's created
+# and the with-block variable holds the default value.
+#
+# You can also pass a stream as the first argument if you want
+# to open the file yourself. The stream must support seek, truncate,
+# and close.
+class edit:
+    def __init__(self, fn_or_stream, default=None):
+        self.fn_or_stream = fn_or_stream
+        self.default = default
+    def __enter__(self):
+        if isinstance(self.fn_or_stream, str):
+            # Open the named file.
+            try:
+                self.stream = open(self.fn_or_stream, "r+")
+            except FileNotFoundError:
+                if not isinstance(self.default, (list, dict)):
+                    # If there is no default and the file
+                    # does not exist, re-raise the exception.
+                    raise
+                else:
+                    # Create a new file holding the default,
+                    # then seek back to the beginning so
+                    # we can read it below.
+                    self.stream = open(self.fn_or_stream, "w+")
+                    dump(self.default, self.stream)
+                    self.stream.seek(0)
+
+            self.close_on_exit = True
+        else:
+            # Use the given stream.
+            self.stream = self.fn_or_stream
+
+        # Parse stream and return data.
+        self.data = load(self.stream)
+        return self.data
+
+    def __exit__(self, *exception):
+        # Truncate stream and write new data.
+        self.stream.seek(0);
+        self.stream.truncate()
+        dump(self.data, self.stream)
+
+        # Close stream if we opened it.
+        if getattr(self, "close_on_exit", False):
+            self.stream.close()
