@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 import yaml
 try:
-    # Use the native code backends, if available.	
+    # Use the native code backends, if available.   
     from yaml import CSafeLoader as Loader, CDumper as Dumper
 except ImportError:
     from yaml import SafeLoader as Loader, Dumper
@@ -52,26 +52,26 @@ Dumper.add_representer(OrderedDict, ordered_dict_serializer)
 # the empty string, ', ", |, or >, or None to, presumably, choose
 # automatically and use no quoting where possible.
 def our_string_representer(dumper, value):
-	# let PyYAML choose by default, using no quoting where possible
-	style = None
+    # let PyYAML choose by default, using no quoting where possible
+    style = None
 
-	# If it looks like an octal number, force '-quote style.
-	if re.match(r"^0\d*$", value): style = "'"
+    # If it looks like an octal number, force '-quote style.
+    if re.match(r"^0\d*$", value): style = "'"
 
-	# If it has newlines, request a block style.
-	if "\n" in value:
-		# If the average length of a line is very long, then use the folded
-		# style so that in our output the lines get folded. The drawback when
-		# this is used on shortlines is that newlines get doubled. So when
-		# the lines are short, use the literal block style.
-		lines = value.split("\n")
-		avg_line_length = sum(len(line) for line in lines) / float(len(lines))
-		if avg_line_length > 70:
-			style = ">" # folded
-		else:
-			style = "|"
+    # If it has newlines, request a block style.
+    if "\n" in value:
+        # If the average length of a line is very long, then use the folded
+        # style so that in our output the lines get folded. The drawback when
+        # this is used on shortlines is that newlines get doubled. So when
+        # the lines are short, use the literal block style.
+        lines = value.split("\n")
+        avg_line_length = sum(len(line) for line in lines) / float(len(lines))
+        if avg_line_length > 70:
+            style = ">" # folded
+        else:
+            style = "|"
 
-	return dumper.represent_scalar(u'tag:yaml.org,2002:str', value, style=style)
+    return dumper.represent_scalar(u'tag:yaml.org,2002:str', value, style=style)
 
 if sys.version < '3':
     # python 2 'str' and 'unicode'
@@ -85,7 +85,7 @@ else:
 # Add a representer for nulls too. YAML accepts "~" for None, but the
 # default output converts that to "null". Override to always use "~".
 Dumper.add_representer(type(None), lambda dumper, value : \
-	dumper.represent_scalar(u'tag:yaml.org,2002:null', u"~"))
+    dumper.represent_scalar(u'tag:yaml.org,2002:null', u"~"))
 
 # Use a subclss of list when trying to hold onto a block comment at the
 # start of a stream. Make sure it serializes back to a plain YAML list.
