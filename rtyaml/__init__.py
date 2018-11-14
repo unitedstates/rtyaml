@@ -1,6 +1,6 @@
 import sys, re, io
-from collections import OrderedDict
 
+# Import YAML's SafeLoader.
 import yaml
 try:
     # Use the native code backends, if available.   
@@ -8,25 +8,31 @@ try:
 except ImportError:
     from yaml import SafeLoader as Loader, Dumper
 
-# In order to preserve the order of attributes, YAML must be
-# hooked to load mappings as OrderedDicts. Adapted from:
+# Before Python 3.7 when dicts began to preserver the insertion
+# order of elements, in order to preserve the order of mappings,
+# YAML must be hooked to load mappings as OrderedDicts. Adapted from:
 # https://gist.github.com/317164
+from collections import OrderedDict
+if sys.version_info < (3,7):
+    def construct_odict(load, node):
+        omap = OrderedDict()
+        yield omap
+        if not isinstance(node, yaml.MappingNode):
+            raise yaml.constructor.ConstructorError(
+                "while constructing an ordered map",
+                node.start_mark,
+                "expected a map, but found %s" % node.id, node.start_mark
+            )
+        for key, value in node.value:
+            key = load.construct_object(key)
+            value = load.construct_object(value)
+            omap[key] = value
 
-def construct_odict(load, node):
-    omap = OrderedDict()
-    yield omap
-    if not isinstance(node, yaml.MappingNode):
-        raise yaml.constructor.ConstructorError(
-            "while constructing an ordered map",
-            node.start_mark,
-            "expected a map, but found %s" % node.id, node.start_mark
-        )
-    for key, value in node.value:
-        key = load.construct_object(key)
-        value = load.construct_object(value)
-        omap[key] = value
+    Loader.add_constructor(u'tag:yaml.org,2002:map', construct_odict)
 
-Loader.add_constructor(u'tag:yaml.org,2002:map', construct_odict)
+# Whether or not we deserialize using OrderedDicts, tell YAML to serialize
+# OrderedDicts as mappings, i.e. for Python >=3.7 allow OrderedDicts to be
+# used to construct ordered data for backwards compatibility.
 def ordered_dict_serializer(self, data):
     return self.represent_mapping('tag:yaml.org,2002:map', data.items())
 Dumper.add_representer(OrderedDict, ordered_dict_serializer)
@@ -74,11 +80,11 @@ def our_string_representer(dumper, value):
     return dumper.represent_scalar(u'tag:yaml.org,2002:str', value, style=style)
 
 if sys.version < '3':
-    # python 2 'str' and 'unicode'
+    # In Python 2, 'str' and 'unicode' both should serialize to YAML strings.
     Dumper.add_representer(str, our_string_representer)
     Dumper.add_representer(unicode, our_string_representer)
 else:
-    # python 3 'str' only -- bytes should only hold binary data
+    # In Python 3, only 'str' are strings. 'bytes' should only hold binary data
     # and be serialized as such.
     Dumper.add_representer(str, our_string_representer)
 
