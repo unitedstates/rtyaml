@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# pip3 install twine
-# rm -rf dist && python3 setup.py bdist_wheel --universal
+# python3 -m pip install --user --upgrade setuptools wheel twine
+# rm -rf dist && python3 setup.py sdist bdist_wheel --universal
 # twine upload dist/*
 # git tag v1.0.XXX
 # git push --tags
@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='rtyaml',
-    version='0.0.4',
+    version='0.0.5',
     author=u'Joshua Tauberer',
     author_email=u'jt@occams.info',
     packages=['rtyaml'],
