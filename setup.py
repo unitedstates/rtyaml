@@ -17,6 +17,7 @@ setup(
     url='https://github.com/unitedstates/rtyaml',
     license='CC0 (copyright waived)',
     description='All the annoying things to make YAML usable in a source controlled environment.',
-    long_description=open("README.rst").read(),
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     install_requires=["pyyaml"],
 )
