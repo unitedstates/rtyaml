@@ -13,6 +13,32 @@ This module is a wrapper around `pyyaml` to read and write YAML files with some 
 -   Other sane defaults are chosen like using the "safe" loader/dumper.
 -   A comment block found at the very beginning of a stream when loading YAML is preserved when writing it back out.
 
+## What do you mean by round-tripping?
+
+Round-tripping is when you load a file and then save it unchanged, you expect the bytes on disk not to change. This isn't possible with PyYAML, and it makes it difficult to use YAML files with version control like git because every time you load and save the file, things can get rearranged. Keys can change order, string quoting styles can change, #-comments are removed, and so on.
+
+Although `rtyaml` can't provide round-tripping for all files, it does set some sane defaults on PyYAML so that it's easier to achieve. For instance, if you load this file with PyYAML:
+
+![](screenshots/rtyaml.png)
+
+and then save it back out unchanged:
+
+```python
+import yaml
+print(yaml.dump(yaml.load(open('example.yaml'))))
+```
+
+you get this mess:
+
+![](screenshots/without-rtyaml.png)
+
+Notice how the comment is gone, the keys `zz`, `yy`, `xx` changed order, the strings are inconsistently formatted, nulls use a confusing keyword, and mappings are condensed into single lines.
+
+With `ryaml`, you actually get the original file back! That's basically the whole point of this library.
+
+
+## Installation and usage
+
 Install:
 
     pip install rtyaml

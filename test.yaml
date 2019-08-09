@@ -1,0 +1,21 @@
+# Comments at the start of the file are preserved
+# when round-tripping files.
+keys:
+  zz: 1 # <--- Order of keys is preserved.
+  yy: 2
+  xx: 3
+strings:
+  a: "07" # <--- automatically quoted when it looks like an integer
+  b: "08" # <--- quotes used consistently
+  c: No quotes are needed when the value can only be a string.
+nulls: ~  # <--- tilde
+multiline-strings:
+  short: |
+    Multi-line text with short lines is
+    dumped using the "literal" ("|"") block style,
+    because wrapping isn't needed.
+  long: >
+    Text with very long lines automatically uses the folded (">") block style
+    which wraps long lines automatically so the file fits nicely in a text editor.
+
+    This is a standard YAML format, but you need rtyaml to automatically use it.

@@ -152,6 +152,9 @@ def do_load(stream, load_func):
             # The list class can't be assigned any custom attributes, but we can make a subclass that can.
             # Clone the list object into a RtYamlList instance.
             obj = RtYamlList(obj)
+        if isinstance(obj, dict):
+            # The dict class can't be assigned any custom attributes, so we'll use an OrderedDict instead, which can.
+            obj = OrderedDict(obj)
         obj.__initial_comment_block = initial_comment_block
 
     return obj
@@ -164,12 +167,19 @@ def dump_all(data, stream=None):
 
 def do_dump(data, stream, dump_func):
     # If we pulled in an initial comment block when reading the stream, write
-    # it back out at the start of the stream.
-    if hasattr(data, '__initial_comment_block'):
+    # it back out at the start of the stream. If we're dumping to a string,
+    # then stream is none.
+    if hasattr(data, '__initial_comment_block') and stream is not None:
         stream.write(data.__initial_comment_block)
 
     # Write the object to the stream.
-    return dump_func(data, stream, default_flow_style=False, allow_unicode=True, Dumper=Dumper)
+    ret = dump_func(data, stream, default_flow_style=False, allow_unicode=True, Dumper=Dumper)
+
+    # If we're dumping to a stream, pre-pend the initial comment block.
+    if hasattr(data, '__initial_comment_block') and stream is None and isinstance(ret, str):
+        ret = data.__initial_comment_block + ret
+
+    return ret
 
 def pprint(data):
     yaml.dump(data, sys.stdout, default_flow_style=False, allow_unicode=True)
