@@ -6,11 +6,12 @@ Primary author: Joshua Tauberer <https://razor.occams.info>
 -   GitHub: <https://github.com/unitedstates/rtyaml>
 -   PyPi: <https://pypi.python.org/pypi/rtyaml>
 
-This module provides wrappers around `pyyaml` to set sane defaults:
+This module is a wrapper around `pyyaml` to read and write YAML files with some improvements:
 
--   round-tripping YAML files is possible by preserving field order
--   saner output defaults are set for strings
--   a comment block found at the very beginning of a stream when loading YAML is preserved when writing it back out
+-   Round-tripping YAML files is possible by preserving the order of keys. In Python 3.7+, just use regular `dict`s. In prior versions of Python, use `collections.OrderedDict`.
+-   Saner defaults are set for how strings are written out to YAML (see below).
+-   Other sane defaults are chosen like using the "safe" loader/dumper.
+-   A comment block found at the very beginning of a stream when loading YAML is preserved when writing it back out.
 
 Install:
 
@@ -20,11 +21,16 @@ Install:
 Usage:
 
     import rtyaml
-    stuff = rtyaml.load(open("myfile.yaml"))
+    
+    with open("myfile.yaml") as f:
+      stuff = rtyaml.load(f)
+    
     # ...do things to stuf...
-    rtyaml.dump(stuff, open("myfile.yaml", "w"))
+    
+    with open("myfile.yaml", "w") as f:
+      rtyaml.dump(stuff, f)
 
-As in the underlying pyyaml library, `load` accepts a byte string containing YAML, a Unicode string containing YAML, an open binary file object, or an open text file object. Also, the second argument to `dump` is optional and if omitted the function returns the YAML in a string.
+As in the underlying pyyaml library, `load` accepts a string or bytes-string containing YAML or an open file object (binary or text). Also, the second argument to `dump` is optional and if omitted the function returns the YAML in a string.
 
 `load_all` and `dump_all` are also supported, which load and save lists of documents using YAML's `---` document separator.
 
@@ -40,22 +46,32 @@ Details
 This library does the following:
 
 -   Uses the native libyaml CSafeLoader and CDumper for both speed and trustable operations.
--   Parses mappings as OrderedDicts so that the field order remains the same when dumping the file later.
--   Writes unicode strings without any weird YAML tag. They just appear as strings. Output is UTF-8 encoded, and non-ASCII characters appear as Unicode without escaping.
--   Writes multi-line strings in block mode rather than quoted with embedded "n"'s, choosing between the literal or folded mode depending on what looks better for the length of the lines in the string.
+-   Preserves the order of keys in `dicts` rather than alphebetizing the keys (Python >=3.7).
+-   Allows you to use `collections.OrderedDict`s with `dump` to preserve key order (useful before Python 3.7).
+-   Writes multi-line strings in block mode (rather than quoted with ugly escaped newline characters), choosing between the literal or folded mode depending on what looks better for the length of the lines in the string.
 -   Writes mappings and lists in the expanded (one per line) format, which is nice when the output is going in version control.
--   Modifies the string quote rules so that any string made up of digits is serialized with quotes. (The default settings serialize the string "01" with quotes but the string "09" without quotes! (Can you figure out why?))
--   Serializes null values as the tilde rather than as "null" (without quotes), which I think is less confusing.
--   If a block comment appears at the start of the file (i.e. one or more lines starting with a '\#'), write it back out if the same object is written with rtyaml.dump().
+-   Modifies the flow string quoting rules so that any string made up of digits is serialized with quotes. (The default settings serialize the string "01" with quotes but the string "09" without quotes! (Can you figure out why?))
+-   `None` is serialized as the tilde rather than as `null`, which is less confusing.
+-   If a block comment appears at the start of the file (i.e. one or more lines starting with a '#'), write it back out if the same object is written with rtyaml.dump().
+
+For Python 3.6 and earlier:
+
+-   Loads mappings `collections.OrderedDict` so that the key order remains the same when dumping the file later using. (This is no longer needed in Python 3.7 because key order is preserved in regular `dict`s now.)
+
+For Python 2.x and earlier:
+
+-   Writes unicode strings without any weird YAML tag. They just appear as strings. Output is UTF-8 encoded, and non-ASCII characters appear as Unicode without escaping.
 
 With-Block Helper for Editing Files In-Place
 --------------------------------------------
 
-The rtyaml.edit class is a utility class that can be used with with blocks that makes it easier to edit YAML files in-place. For example:
+The `rtyaml.edit` class is a utility class that can be used with with blocks that makes it easier to edit YAML files in-place. For example:
 
-> with rtyaml.edit("path/to/data.yaml", default={}) as data:  
-> data\["hello"\] = "world"
->
+```
+with rtyaml.edit("path/to/data.yaml", default={}) as data:  
+   data\["hello"\] = "world"
+```
+
 The file is opened for editing ("r+" mode, or "w+" mode if it doesn't exist and a default value is given) and its contents is parsed and returned as the data with-block variable. The file is kept open while the with-block is executing. When the with-block exits, the with-block variable is written back to the file as YAML, and then the file is closed.
 
 This will, of course, only work if the file contains an array or object (dict), and you cannot assign a new value to the with-block variable (that's just how Python with blocks work). You can only call its methods, i.e., you can edit the list (append, pop, sort, etc.) and dict (get/set keys), but you can't replace the value with an entirely new list or dict.
