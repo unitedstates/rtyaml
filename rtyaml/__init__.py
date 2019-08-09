@@ -30,9 +30,20 @@ if sys.version_info < (3,7):
 
     Loader.add_constructor(u'tag:yaml.org,2002:map', construct_odict)
 
-# Whether or not we deserialize using OrderedDicts, tell YAML to serialize
-# OrderedDicts as mappings, i.e. for Python >=3.7 allow OrderedDicts to be
-# used to construct ordered data for backwards compatibility.
+else:
+    # Starting with Pyhon 3.7, dicts preserve order. But PyYAML by default
+    # sorts the keys of any mapping it gets when that mapping has an 'items'
+    # attribute. We override that by adding an explicit representer for 'dict'
+    # that passes the items directly (so that the value it seems does not have
+    # an 'items' attribute itself). See https://github.com/yaml/pyyaml/blob/e471e86bf6dabdad45a1438c20a4a5c033eb9034/lib/yaml/representer.py#L119.
+    # See below for similar code for OrderedDicts.
+    Dumper.add_representer(dict, lambda self, data: self.represent_mapping('tag:yaml.org,2002:map', data.items()))
+
+# Tell YAML to serialize OrderedDicts as mappings. Prior to Python 3.7, this
+# was the data type that must be used to specify key order, and, per the block
+# above, we would deserialize to OrderedDicts. In Python >=3.7, we don't deserialize
+# to OrderedDicts anymore but we still allow OrderedDicts to be used in data passed
+# to dump. See the block above for why we also add an explicit serializer for dicts.
 def ordered_dict_serializer(self, data):
     return self.represent_mapping('tag:yaml.org,2002:map', data.items())
 Dumper.add_representer(OrderedDict, ordered_dict_serializer)
