@@ -48,18 +48,10 @@ def ordered_dict_serializer(self, data):
     return self.represent_mapping('tag:yaml.org,2002:map', data.items())
 Dumper.add_representer(OrderedDict, ordered_dict_serializer)
 
-# Likewise, when we store unicode objects make sure we don't write
-# them with weird YAML tags indicating the Python data type. str-typed
-# strings come out fine, but unicode strings come out with unnecessary
-# type tags in Python 2. The easy solution is this:
+# The standard PyYAML representer for strings does something weird:
+# If a value cannot be parsed as another data type, quotes are omitted.
 #
-#   Dumper.add_representer(unicode, lambda dumper, value:
-#        dumper.represent_scalar(u'tag:yaml.org,2002:str', value))
-#
-# However, the standard PyYAML representer for strings does something
-# weird: if a value cannot be parsed as an integer quotes are omitted.
-#
-# This is incredibly odd when the value is an integer with a leading
+# This is incredibly odd when the value is integer-like with a leading
 # zero. These values are typically parsed as octal integers, meaning
 # quotes would normally be required (that's good). But when the value
 # has an '8' or '9' in it, this would make it an invalid octal number
@@ -67,7 +59,7 @@ Dumper.add_representer(OrderedDict, ordered_dict_serializer)
 # We will override str and unicode output to choose the quotation
 # style with our own logic. (According to PyYAML, style can be one of
 # the empty string, ', ", |, or >, or None to, presumably, choose
-# automatically and use no quoting where possible.
+# automatically and use no quoting where possible.)
 def our_string_representer(dumper, value):
     # let PyYAML choose by default, using no quoting where possible
     style = None
@@ -92,6 +84,11 @@ def our_string_representer(dumper, value):
 
 if sys.version < '3':
     # In Python 2, 'str' and 'unicode' both should serialize to YAML strings.
+    # Unicode strings come out with unnecessary type tags in Python 2. The easy
+    # solution is this:
+    #   Dumper.add_representer(unicode, lambda dumper, value:
+    #        dumper.represent_scalar(u'tag:yaml.org,2002:str', value))
+    # but because we are also overriding string behavior, we use our own representer.
     Dumper.add_representer(str, our_string_representer)
     Dumper.add_representer(unicode, our_string_representer)
 else:
