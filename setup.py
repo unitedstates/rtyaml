@@ -10,7 +10,7 @@ from setuptools import setup
 
 setup(
     name='rtyaml',
-    version='0.0.5',
+    version='1.0.0',
     author=u'Joshua Tauberer',
     author_email=u'jt@occams.info',
     packages=['rtyaml'],
