@@ -95,7 +95,7 @@ The `rtyaml.edit` class is a utility class that can be used with with blocks tha
 
 ```
 with rtyaml.edit("path/to/data.yaml", default={}) as data:  
-   data\["hello"\] = "world"
+   data["hello"] = "world"
 ```
 
 The file is opened for editing ("r+" mode, or "w+" mode if it doesn't exist and a default value is given) and its contents is parsed and returned as the data with-block variable. The file is kept open while the with-block is executing. When the with-block exits, the with-block variable is written back to the file as YAML, and then the file is closed.
