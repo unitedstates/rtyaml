@@ -81,20 +81,7 @@ def our_string_representer(dumper, value):
             style = "|"
 
     return dumper.represent_scalar(u'tag:yaml.org,2002:str', value, style=style)
-
-if sys.version < '3':
-    # In Python 2, 'str' and 'unicode' both should serialize to YAML strings.
-    # Unicode strings come out with unnecessary type tags in Python 2. The easy
-    # solution is this:
-    #   Dumper.add_representer(unicode, lambda dumper, value:
-    #        dumper.represent_scalar(u'tag:yaml.org,2002:str', value))
-    # but because we are also overriding string behavior, we use our own representer.
-    Dumper.add_representer(str, our_string_representer)
-    Dumper.add_representer(unicode, our_string_representer)
-else:
-    # In Python 3, only 'str' are strings. 'bytes' should only hold binary data
-    # and be serialized as such.
-    Dumper.add_representer(str, our_string_representer)
+Dumper.add_representer(str, our_string_representer)
 
 # Add a representer for nulls too. YAML accepts "~" for None, but the
 # default output converts that to "null". Override to always use "~".
@@ -120,12 +107,6 @@ def load_all(stream):
 def do_load(stream, load_func):
     # Read any comment block at the start.
     initial_comment_block = ""
-
-    # We can only read a comment block if we can seek the stream so we can simulate
-    # a peek() so we can test for a comment block without consuming the data. Seek
-    # isn't provided on the Python 2 io.TextIOWrapper so we can't use it on text streams.
-    if sys.version < '3' and isinstance(stream, file):
-        stream = io.open(stream.fileno(), mode="rb", closefd=False)
 
     # Try reading the stream until the first non-comment line, then seek back to the
     # start of that line.

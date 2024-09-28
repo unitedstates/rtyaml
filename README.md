@@ -42,7 +42,6 @@ With `ryaml`, you actually get the original file back! That's basically the whol
 Install:
 
     pip install rtyaml
-    (or pip3 --- this module works in both Python 2 and Python 3)
 
 Usage:
 
@@ -83,10 +82,6 @@ This library does the following:
 For Python 3.6 and earlier:
 
 -   Loads mappings `collections.OrderedDict` so that the key order remains the same when dumping the file later using. (This is no longer needed in Python 3.7 because key order is preserved in regular `dict`s now.)
-
-For Python 2.x and earlier:
-
--   Writes unicode strings without any weird YAML tag. They just appear as strings. Output is UTF-8 encoded, and non-ASCII characters appear as Unicode without escaping.
 
 With-Block Helper for Editing Files In-Place
 --------------------------------------------
