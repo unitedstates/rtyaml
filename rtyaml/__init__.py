@@ -133,7 +133,7 @@ def do_load(stream, load_func):
         while True:
             p = stream.tell()
             line = stream.readline()
-            if line[0] != "#":
+            if not line or line[0] != "#":
                 stream.seek(p)
                 break
             initial_comment_block += line
