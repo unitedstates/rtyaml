@@ -136,7 +136,13 @@ def do_load(stream, load_func):
         if isinstance(obj, dict):
             # The dict class can't be assigned any custom attributes, so we'll use an OrderedDict instead, which can.
             obj = OrderedDict(obj)
-        obj.__initial_comment_block = initial_comment_block
+        if isinstance(obj, (RtYamlList, OrderedDict)):
+            # Only the two types above can hold the attribute. Everything else
+            # reaching here can't take one: a scalar, the None from a file that
+            # is nothing but comments, or the generator that load_all returns.
+            # do_dump looks the attribute up with hasattr, so those simply do
+            # not carry the comment back out.
+            obj.__initial_comment_block = initial_comment_block
 
     return obj
 
